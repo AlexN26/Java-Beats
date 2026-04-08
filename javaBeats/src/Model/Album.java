@@ -1,44 +1,42 @@
 package Model;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Album {
-    public String nom;
-    public String date_de_sortie;
-    public float Ecoutes;
+public class Album implements Serializable {
+    private String nom;
+    private String dateDeSortie;
+    private TypeAlbum type;
+    private Artiste artiste;
+    private List<Morceau> morceaux;
 
-    public Album(String date_de_sortie, String nom, float ecoutes) {
-        this.date_de_sortie = date_de_sortie;
+    public Album(String nom, String dateDeSortie, TypeAlbum type, Artiste artiste) {
         this.nom = nom;
-        Ecoutes = ecoutes;
+        this.dateDeSortie = dateDeSortie;
+        this.type = type;
+        this.artiste = artiste;
+        this.morceaux = new ArrayList<>();
     }
 
-    public String getDate_de_sortie() {
-        return date_de_sortie;
+    public void ajouterMorceau(Morceau morceau) { morceaux.add(morceau); }
+
+    public int getTotalEcoutes() {
+        return morceaux.stream().mapToInt(Morceau::getNbEcoutes).sum();
     }
 
-    public float getEcoutes() {
-        return Ecoutes;
-    }
+    public String getNom() { return nom; }
+    public String getDateDeSortie() { return dateDeSortie; }
+    public TypeAlbum getType() { return type; }
+    public Artiste getArtiste() { return artiste; }
+    public List<Morceau> getMorceaux() { return morceaux; }
 
-    public String getNom() {
-        return nom;
-    }
+    public void setNom(String nom) { this.nom = nom; }
+    public void setDateDeSortie(String dateDeSortie) { this.dateDeSortie = dateDeSortie; }
+    public void setType(TypeAlbum type) { this.type = type; }
 
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
-
-    public void setDate_de_sortie(String date_de_sortie) {
-        this.date_de_sortie = date_de_sortie;
-    }
-
-    public void setEcoutes(float ecoutes) {
-        Ecoutes = ecoutes;
-    }
-
-    public void info(){
-        System.out.println("nom :"+this.nom);
-        System.out.println("date :"+this.date_de_sortie);
-        System.out.println("ecoutes :"+this.Ecoutes);
+    @Override
+    public String toString() {
+        return nom + " (" + type + ", " + dateDeSortie + ")";
     }
 }

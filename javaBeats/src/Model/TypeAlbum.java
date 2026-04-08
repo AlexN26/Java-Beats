@@ -1,4 +1,5 @@
 package Model;
 
-public class TypeAlbum {
+public enum TypeAlbum {
+    ALBUM, EP, SINGLE, COMPILATION
 }

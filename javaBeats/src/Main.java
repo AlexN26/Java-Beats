@@ -1,15 +1,43 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-void main() {
-    //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-    // to see how IntelliJ IDEA suggests fixing it.
-    IO.println(String.format("Hello and welcome!"));
-    System.out.println("test1/2");
+import Controller.CatalogueController;
+import Controller.PlaylistController;
+import Controller.UtilisateurController;
+import Model.Catalogue;
+import Persistance.PersistanceManager;
+import View.VueConsole;
 
-    for (int i = 1; i <= 5; i++) {
-        //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-        // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-        IO.println("i = " + i);
-        System.out.println("Brice est full BG");
+import java.io.IOException;
+
+public class Main {
+
+    public static void main(String[] args) {
+        Catalogue catalogue = chargerCatalogue();
+        if (catalogue.getMorceaux().isEmpty() && catalogue.getAlbums().isEmpty() && catalogue.getArtistes().isEmpty()) {
+            CatalogueController.seedDemoData(catalogue);
+        }
+
+        UtilisateurController utilisateurController = new UtilisateurController();
+        CatalogueController catalogueController = new CatalogueController(catalogue);
+        PlaylistController playlistController = new PlaylistController();
+
+        VueConsole vueConsole = new VueConsole(utilisateurController, catalogueController, playlistController);
+        vueConsole.run();
+
+        try {
+            PersistanceManager.sauvegarder(catalogue);
+        } catch (IOException e) {
+            System.err.println("[WARN] Impossible de sauvegarder le catalogue: " + e.getMessage());
+        }
+    }
+
+    private static Catalogue chargerCatalogue() {
+        if (!PersistanceManager.fichierExiste()) {
+            return new Catalogue();
+        }
+        try {
+            return PersistanceManager.charger();
+        } catch (Exception e) {
+            System.err.println("[WARN] Chargement catalogue.dat impossible, utilisation d'un catalogue vide: " + e.getMessage());
+            return new Catalogue();
+        }
     }
 }

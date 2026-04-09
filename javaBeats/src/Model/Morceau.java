@@ -26,6 +26,13 @@ public class Morceau implements Serializable {
     public void setDureeSecondes(int dureeSecondes) { this.dureeSecondes = dureeSecondes; }
     public void setArtiste(Artiste artiste) { this.artiste = artiste; }
 
+
+    public void information(){
+        System.out.println("titre :"+this.titre);
+        System.out.println("nombre d'ecoute :"+this.nbEcoutes);
+        System.out.println("artiste :"+this.artiste);
+
+    }
     @Override
     public String toString() {
         return titre + " — " + artiste.getNom() + " (" + dureeSecondes / 60 + ":" + String.format("%02d", dureeSecondes % 60) + ")";

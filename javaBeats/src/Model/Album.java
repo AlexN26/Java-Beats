@@ -35,6 +35,12 @@ public class Album implements Serializable {
     public void setDateDeSortie(String dateDeSortie) { this.dateDeSortie = dateDeSortie; }
     public void setType(TypeAlbum type) { this.type = type; }
 
+    public void information(){
+        System.out.println("nom :"+this.nom);
+        System.out.println("date de sortie :"+this.dateDeSortie);
+        System.out.println("Artiste :"+this.artiste);
+    }
+
     @Override
     public String toString() {
         return nom + " (" + type + ", " + dateDeSortie + ")";

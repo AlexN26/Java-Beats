@@ -24,6 +24,13 @@ public class Artiste implements Serializable {
     public void setNom(String nom) { this.nom = nom; }
     public void setBiographie(String biographie) { this.biographie = biographie; }
 
+
+    public void information(){
+        System.out.println("nom :"+this.nom);
+        System.out.println("Biographie :"+this.biographie);
+        System.out.println("album :"+this.albums);
+    }
+
     @Override
     public String toString() { return nom; }
 }

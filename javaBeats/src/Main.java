@@ -10,7 +10,7 @@ import java.io.IOException;
 public class Main {
 
     public static void main(String[] args) {
-        Catalogue catalogue = chargerCatalogue();
+        Catalogue catalogue = PersistanceManager.chargerOuNouveau();
         if (catalogue.getMorceaux().isEmpty() && catalogue.getAlbums().isEmpty() && catalogue.getArtistes().isEmpty()) {
             CatalogueController.seedDemoData(catalogue);
         }
@@ -26,18 +26,6 @@ public class Main {
             PersistanceManager.sauvegarder(catalogue);
         } catch (IOException e) {
             System.err.println("[WARN] Impossible de sauvegarder le catalogue: " + e.getMessage());
-        }
-    }
-
-    private static Catalogue chargerCatalogue() {
-        if (!PersistanceManager.fichierExiste()) {
-            return new Catalogue();
-        }
-        try {
-            return PersistanceManager.charger();
-        } catch (Exception e) {
-            System.err.println("[WARN] Chargement catalogue.dat impossible, utilisation d'un catalogue vide: " + e.getMessage());
-            return new Catalogue();
         }
     }
 }

@@ -3,7 +3,7 @@ package Model;
 import java.io.Serializable;
 
 public class Avis implements Serializable {
-    private int note;        // 1 à 5
+    private int note;
     private String commentaire;
     private String auteurLogin;
     private Morceau morceau;

@@ -8,6 +8,7 @@ public class Artiste implements Serializable {
     private String nom;
     private String biographie;
     private List<Album> albums;
+    private String dateNaissance;
 
     public Artiste(String nom, String biographie) {
         this.nom = nom;
@@ -21,9 +22,16 @@ public class Artiste implements Serializable {
     public String getBiographie() { return biographie; }
     public List<Album> getAlbums() { return albums; }
 
+    public String getDateNaissance() {
+        return dateNaissance;
+    }
+
     public void setNom(String nom) { this.nom = nom; }
     public void setBiographie(String biographie) { this.biographie = biographie; }
 
+    public void setDateNaissance(String dateNaissance) {
+        this.dateNaissance = dateNaissance;
+    }
 
     public void information(){
         System.out.println("nom :"+this.nom);

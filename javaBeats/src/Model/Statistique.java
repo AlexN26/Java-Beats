@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Statistique implements Serializable {
     private Catalogue catalogue;
-
+    private int nbEcoutesTotal;
     public Statistique(Catalogue catalogue) {
         this.catalogue = catalogue;
     }

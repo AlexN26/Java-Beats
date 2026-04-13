@@ -7,6 +7,8 @@ import View.VueConsole;
 
 import java.io.IOException;
 
+import View.VueGraphique;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -19,8 +21,9 @@ public class Main {
         CatalogueController catalogueController = new CatalogueController(catalogue);
         PlaylistController playlistController = new PlaylistController();
 
-        VueConsole vueConsole = new VueConsole(utilisateurController, catalogueController, playlistController);
-        vueConsole.run();
+        // 🔥 Vue Graphique au lieu de console
+        VueGraphique vueGraphique = new VueGraphique(utilisateurController, catalogueController, playlistController);
+        vueGraphique.run();
 
         try {
             PersistanceManager.sauvegarder(catalogue);

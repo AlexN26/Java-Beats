@@ -5,7 +5,9 @@ import Model.User.Administrateur;
 import Model.User.Utilisateur;
 import Model.User.Visiteur;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class UtilisateurController {
@@ -67,6 +69,18 @@ public class UtilisateurController {
 		utilisateursParLogin.put(login, nouvel);
 		utilisateurCourant = nouvel;
 		return true;
+	}
+
+	public void ajouterInscrit(String login, String motDePasse, String email) {
+		throw new UnsupportedOperationException("Fonctionnalite administrateur non implementee.");
+	}
+
+	public void supprimerInscrit(String login) {
+		throw new UnsupportedOperationException("Fonctionnalite administrateur non implementee.");
+	}
+
+	public List<Utilisateur> listerUtilisateurs() {
+		return new ArrayList<>(utilisateursParLogin.values());
 	}
 
 	public void deconnexion() {

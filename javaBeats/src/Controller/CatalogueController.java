@@ -30,6 +30,14 @@ public class CatalogueController {
 		return catalogue.getArtistes();
 	}
 
+	public void ajouterMusique(Morceau morceau) {
+		throw new UnsupportedOperationException("Fonctionnalite administrateur non implementee.");
+	}
+
+	public void supprimerMusique(Morceau morceau) {
+		throw new UnsupportedOperationException("Fonctionnalite administrateur non implementee.");
+	}
+
 	public List<Morceau> rechercherMorceau(String titre) {
 		return catalogue.rechercherMorceau(titre);
 	}

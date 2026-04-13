@@ -3,7 +3,6 @@ import Controller.PlaylistController;
 import Controller.UtilisateurController;
 import Model.Catalogue;
 import Persistance.PersistanceManager;
-import View.VueConsole;
 
 import java.io.IOException;
 

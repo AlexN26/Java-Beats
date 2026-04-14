@@ -3,7 +3,7 @@ package Controller;
 import Model.*;
 import Model.User.Abonne;
 import Model.User.Utilisateur;
-
+import Model.User.Visiteur;
 import java.util.List;
 
 public class CatalogueController {
@@ -51,13 +51,16 @@ public class CatalogueController {
 	}
 
 	public void ecouter(Utilisateur utilisateur, Morceau morceau) {
-		if (morceau == null) {
-			return;
-		}
-		if (utilisateur instanceof Abonne abonne && abonne.isAbonnementActif()) {
+		if (morceau == null) return;
+		if (utilisateur instanceof Visiteur visiteur) {
+			if (visiteur.getNbEcoutesSession() >= 5) {
+				throw new RuntimeException("Limite de 5 écoutes atteinte pour cette session.");
+			}
+			visiteur.incrementerEcoutesSession();
+			morceau.incrementerEcoutes();
+		} else if (utilisateur instanceof Abonne abonne && abonne.isAbonnementActif()) {
 			abonne.getHistorique().ajouterEntree(morceau);
 		} else {
-			// Visiteur / admin: on incrémente quand même les écoutes globales
 			morceau.incrementerEcoutes();
 		}
 	}

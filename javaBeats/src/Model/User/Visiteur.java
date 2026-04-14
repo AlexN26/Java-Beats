@@ -4,4 +4,7 @@ public class Visiteur extends Utilisateur {
     public Visiteur(String login, String motDePasse, String email) {
         super(login, motDePasse, email);
     }
+    private int nbEcoutesSession = 0;
+    public int getNbEcoutesSession() { return nbEcoutesSession; }
+    public void incrementerEcoutesSession() { nbEcoutesSession++; }
 }

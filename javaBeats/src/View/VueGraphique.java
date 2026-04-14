@@ -168,34 +168,34 @@ public class VueGraphique extends JFrame {
     // =========================
 
     private void ecranConnexion() {
-        JTextField loginField = new JTextField();
+        JTextField PseudoField = new JTextField();
         JPasswordField mdpField = new JPasswordField();
-        loginField.setBackground(Color.WHITE); loginField.setForeground(TEXTE);
+        PseudoField.setBackground(Color.WHITE); PseudoField.setForeground(TEXTE);
         mdpField.setBackground(Color.WHITE);   mdpField.setForeground(TEXTE);
 
-        Object[] msg = {"Login :", loginField, "Mot de passe :", mdpField};
+        Object[] msg = {"Nom d'utilisateur :", PseudoField, "Mot de passe :", mdpField};
         int res = JOptionPane.showConfirmDialog(this, msg, "Connexion", JOptionPane.OK_CANCEL_OPTION);
         if (res != JOptionPane.OK_OPTION) return;
 
-        if (!utilisateurController.connexion(loginField.getText(), new String(mdpField.getPassword()))) {
-            info("Login ou mot de passe incorrect.");
+        if (!utilisateurController.connexion(PseudoField.getText(), new String(mdpField.getPassword()))) {
+            info("Nom d'utilisateur ou mot de passe incorrect.");
         } else {
             afficherMenuSelonRole();
         }
     }
 
     private void ecranInscription() {
-        JTextField loginField = new JTextField();
+        JTextField PseudoField = new JTextField();
         JPasswordField mdpField = new JPasswordField();
         JTextField emailField = new JTextField();
 
-        Object[] msg = {"Login :", loginField, "Mot de passe :", mdpField, "Email (optionnel) :", emailField};
+        Object[] msg = {"Nom d'utilisateur :", PseudoField, "Mot de passe :", mdpField, "Email (optionnel) :", emailField};
         int res = JOptionPane.showConfirmDialog(this, msg, "Inscription", JOptionPane.OK_CANCEL_OPTION);
         if (res != JOptionPane.OK_OPTION) return;
 
-        if (!utilisateurController.inscriptionAbonne(loginField.getText(),
+        if (!utilisateurController.inscriptionAbonne(PseudoField.getText(),
                 new String(mdpField.getPassword()), emailField.getText())) {
-            info("Login déjà utilisé ou informations invalides.");
+            info("Nom d'utilisateur déjà utilisé ou informations invalides.");
         } else {
             afficherMenuSelonRole();
         }

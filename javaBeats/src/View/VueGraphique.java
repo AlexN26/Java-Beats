@@ -411,7 +411,14 @@ public class VueGraphique extends JFrame {
         champPanel.add(champNom);
         nord.add(champPanel, BorderLayout.CENTER);
 
-        changerContenu(nord, creerScroll(liste), creerPanelBoutons(btnCreer, btnRenommer, btnSupprimer, btnOuvrir, btnRetour));
+        // Sur une fenêtre étroite, un FlowLayout peut "cacher" les derniers boutons.
+        // On force donc l'affichage en 2 lignes, avec un bouton Retour toujours visible.
+        JPanel sud = new JPanel();
+        sud.setLayout(new BoxLayout(sud, BoxLayout.Y_AXIS));
+        sud.add(creerPanelBoutons(btnCreer, btnRenommer, btnSupprimer));
+        sud.add(creerPanelBoutons(btnOuvrir, btnRetour));
+
+        changerContenu(nord, creerScroll(liste), sud);
     }
 
     private void menuPlaylist(Abonne abonne, Playlist playlist) {

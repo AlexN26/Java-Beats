@@ -12,14 +12,35 @@ import java.util.Map;
 
 public class UtilisateurController {
 
-	private final Map<String, Utilisateur> utilisateursParLogin = new HashMap<>();
+	private final Map<String, Utilisateur> utilisateursParLogin;
 	private Utilisateur utilisateurCourant;
 
 	public UtilisateurController() {
-		// Comptes de démo (à remplacer par persistance utilisateurs si demandé par votre grille)
+		this(null);
+	}
+
+	public UtilisateurController(Map<String, Utilisateur> utilisateursInitial) {
+		this.utilisateursParLogin = new HashMap<>();
+		if (utilisateursInitial != null) {
+			this.utilisateursParLogin.putAll(utilisateursInitial);
+		}
+		// Comptes de démo uniquement si aucune persistance (ou fichier vide/corrompu)
+		if (this.utilisateursParLogin.isEmpty()) {
+			seedDemoComptes();
+		}
+	}
+
+	private void seedDemoComptes() {
 		utilisateursParLogin.put("admin", new Administrateur("admin", "admin", "admin@javabeats.local"));
 		utilisateursParLogin.put("abonne", new Abonne("abonne", "abonne", "abonne@javabeats.local"));
 		// Pas de "visiteur" stocké: le visiteur est un mode d'usage.
+	}
+
+	/**
+	 * Retourne une copie de la map sérialisable (pour PersistanceManager).
+	 */
+	public Map<String, Utilisateur> snapshotUtilisateursParLogin() {
+		return new HashMap<>(utilisateursParLogin);
 	}
 
 	public Utilisateur getUtilisateurCourant() {

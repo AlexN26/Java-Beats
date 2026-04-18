@@ -3,38 +3,40 @@ package Controller;
 import Model.Morceau;
 import Model.Playlist;
 import Model.User.Abonne;
+import Model.User.Administrateur;
+import Model.User.Utilisateur;
 
 import java.util.List;
 
 public class PlaylistController {
 
-	public List<Playlist> listerPlaylists(Abonne abonne) {
-		return abonne.getPlaylists();
+	public List<Playlist> listerPlaylists(Utilisateur utilisateur) {
+		return getPlaylists(utilisateur);
 	}
 
-	public Playlist creerPlaylist(Abonne abonne, String nom) {
+	public Playlist creerPlaylist(Utilisateur utilisateur, String nom) {
 		if (nom == null || nom.isBlank()) {
 			return null;
 		}
 		Playlist p = new Playlist(nom);
-		abonne.ajouterPlaylist(p);
+		ajouterPlaylist(utilisateur, p);
 		return p;
 	}
 
-	public boolean supprimerPlaylist(Abonne abonne, int indexZeroBased) {
-		List<Playlist> playlists = abonne.getPlaylists();
+	public boolean supprimerPlaylist(Utilisateur utilisateur, int indexZeroBased) {
+		List<Playlist> playlists = getPlaylists(utilisateur);
 		if (indexZeroBased < 0 || indexZeroBased >= playlists.size()) {
 			return false;
 		}
-		abonne.supprimerPlaylist(playlists.get(indexZeroBased));
+		supprimerPlaylist(utilisateur, playlists.get(indexZeroBased));
 		return true;
 	}
 
-	public boolean renommerPlaylist(Abonne abonne, int indexZeroBased, String nouveauNom) {
+	public boolean renommerPlaylist(Utilisateur utilisateur, int indexZeroBased, String nouveauNom) {
 		if (nouveauNom == null || nouveauNom.isBlank()) {
 			return false;
 		}
-		List<Playlist> playlists = abonne.getPlaylists();
+		List<Playlist> playlists = getPlaylists(utilisateur);
 		if (indexZeroBased < 0 || indexZeroBased >= playlists.size()) {
 			return false;
 		}
@@ -60,5 +62,39 @@ public class PlaylistController {
 		}
 		playlist.supprimerMorceau(morceaux.get(indexZeroBased));
 		return true;
+	}
+
+	private List<Playlist> getPlaylists(Utilisateur utilisateur) {
+		if (utilisateur instanceof Abonne abonne) {
+			return abonne.getPlaylists();
+		}
+		if (utilisateur instanceof Administrateur administrateur) {
+			return administrateur.getPlaylists();
+		}
+		throw new IllegalArgumentException("Type d'utilisateur incompatible avec les playlists.");
+	}
+
+	private void ajouterPlaylist(Utilisateur utilisateur, Playlist playlist) {
+		if (utilisateur instanceof Abonne abonne) {
+			abonne.ajouterPlaylist(playlist);
+			return;
+		}
+		if (utilisateur instanceof Administrateur administrateur) {
+			administrateur.ajouterPlaylist(playlist);
+			return;
+		}
+		throw new IllegalArgumentException("Type d'utilisateur incompatible avec les playlists.");
+	}
+
+	private void supprimerPlaylist(Utilisateur utilisateur, Playlist playlist) {
+		if (utilisateur instanceof Abonne abonne) {
+			abonne.supprimerPlaylist(playlist);
+			return;
+		}
+		if (utilisateur instanceof Administrateur administrateur) {
+			administrateur.supprimerPlaylist(playlist);
+			return;
+		}
+		throw new IllegalArgumentException("Type d'utilisateur incompatible avec les playlists.");
 	}
 }

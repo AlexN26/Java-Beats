@@ -230,11 +230,12 @@ public class VueGraphique extends JFrame {
 
         JButton btnCatalogue = creerBouton("Catalogue");
         JButton btnRecherche = creerBouton("Rechercher");
+        JButton btnPlaylists = creerBouton("Mes playlists");
         JButton btnGererCat  = creerBouton("Gérer le catalogue");
         JButton btnGererAbo  = creerBouton("Gérer les abonnés");
         JButton btnStats     = creerBouton("Statistiques");
 
-        for (JButton b : new JButton[]{btnCatalogue, btnRecherche, btnGererCat, btnGererAbo, btnStats}) {
+        for (JButton b : new JButton[]{btnCatalogue, btnRecherche, btnPlaylists, btnGererCat, btnGererAbo, btnStats}) {
             b.setAlignmentX(Component.CENTER_ALIGNMENT);
             b.setMaximumSize(new Dimension(280, 38));
             centre.add(b);
@@ -243,6 +244,7 @@ public class VueGraphique extends JFrame {
 
         btnCatalogue.addActionListener(e -> menuCatalogue());
         btnRecherche.addActionListener(e -> menuRecherche());
+        btnPlaylists.addActionListener(e -> menuPlaylists(utilisateurController.getUtilisateurCourant()));
         btnGererCat.addActionListener(e -> menuGererCatalogue());
         btnGererAbo.addActionListener(e -> menuGererAbonnes());
         btnStats.addActionListener(e -> menuStatistiques());
@@ -360,19 +362,18 @@ public class VueGraphique extends JFrame {
     // Playlists
     // =========================
 
-    private void menuPlaylists(Abonne abonne) {
+    private void menuPlaylists(Utilisateur utilisateur) {
         DefaultListModel<String> modele = new DefaultListModel<>();
         JList<String> liste = creerListe(modele);
 
         Runnable rafraichir = () -> {
             modele.clear();
-            List<Playlist> playlists = abonne.getPlaylists();
+            List<Playlist> playlists = playlistController.listerPlaylists(utilisateur);
             if (playlists.isEmpty()) modele.addElement("(aucune playlist)");
             else playlists.forEach(p -> modele.addElement(p.getNom() + " | " + p.getMorceaux().size() + " morceaux - " + formaterDuree(p.getDureeTotale())));
         };
         rafraichir.run();
 
-        JTextField champNom  = new JTextField(12);
         JButton btnCreer     = creerBouton("Créer");
         JButton btnRenommer  = creerBouton("Renommer");
         JButton btnSupprimer = creerBouton("Supprimer");
@@ -380,43 +381,47 @@ public class VueGraphique extends JFrame {
         JButton btnRetour    = creerBouton("Retour");
 
         btnCreer.addActionListener(e -> {
-            String nom = champNom.getText().trim();
+            String nom = JOptionPane.showInputDialog(this, "Nom de la playlist :", "Créer une playlist",
+                    JOptionPane.PLAIN_MESSAGE);
+            if (nom == null) return;
+            nom = nom.trim();
             if (nom.isEmpty()) { afficherInfo("Entrez un nom."); return; }
-            Playlist p = playlistController.creerPlaylist(abonne, nom);
+            Playlist p = playlistController.creerPlaylist(utilisateur, nom);
             if (p == null) afficherInfo("Création impossible.");
-            else { champNom.setText(""); rafraichir.run(); }
+            else rafraichir.run();
         });
 
         btnRenommer.addActionListener(e -> {
             int idx = liste.getSelectedIndex();
-            String nom = champNom.getText().trim();
-            if (idx < 0 || abonne.getPlaylists().isEmpty()) { afficherInfo("Sélectionnez une playlist."); return; }
+            List<Playlist> playlists = playlistController.listerPlaylists(utilisateur);
+            if (idx < 0 || playlists.isEmpty()) { afficherInfo("Sélectionnez une playlist."); return; }
+            String nom = JOptionPane.showInputDialog(this, "Nouveau nom de la playlist :",
+                    playlists.get(idx).getNom());
+            if (nom == null) return;
+            nom = nom.trim();
             if (nom.isEmpty()) { afficherInfo("Entrez un nouveau nom."); return; }
-            if (playlistController.renommerPlaylist(abonne, idx, nom)) { champNom.setText(""); rafraichir.run(); }
+            if (playlistController.renommerPlaylist(utilisateur, idx, nom)) rafraichir.run();
             else afficherInfo("Impossible.");
         });
 
         btnSupprimer.addActionListener(e -> {
             int idx = liste.getSelectedIndex();
-            if (idx < 0 || abonne.getPlaylists().isEmpty()) { afficherInfo("Sélectionnez une playlist."); return; }
+            if (idx < 0 || playlistController.listerPlaylists(utilisateur).isEmpty()) { afficherInfo("Sélectionnez une playlist."); return; }
             if (demanderConfirmation("Supprimer cette playlist ?"))
-                if (playlistController.supprimerPlaylist(abonne, idx)) rafraichir.run();
+                if (playlistController.supprimerPlaylist(utilisateur, idx)) rafraichir.run();
         });
 
         btnOuvrir.addActionListener(e -> {
             int idx = liste.getSelectedIndex();
-            if (idx < 0 || abonne.getPlaylists().isEmpty()) { afficherInfo("Sélectionnez une playlist."); return; }
-            menuPlaylist(abonne, abonne.getPlaylists().get(idx));
+            List<Playlist> playlists = playlistController.listerPlaylists(utilisateur);
+            if (idx < 0 || playlists.isEmpty()) { afficherInfo("Sélectionnez une playlist."); return; }
+            menuPlaylist(utilisateur, playlists.get(idx));
         });
 
-        btnRetour.addActionListener(e -> menuAbonne(abonne));
+        btnRetour.addActionListener(e -> afficherMenuSelonRole());
 
         JPanel nord = new JPanel(new BorderLayout(10, 5));
-        nord.add(new JLabel("Mes Playlists", SwingConstants.CENTER), BorderLayout.NORTH);
-        JPanel champPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        champPanel.add(new JLabel("Nom :"));
-        champPanel.add(champNom);
-        nord.add(champPanel, BorderLayout.CENTER);
+        nord.add(new JLabel("Mes Playlists", SwingConstants.CENTER), BorderLayout.CENTER);
 
         // Sur une fenêtre étroite, un FlowLayout peut "cacher" les derniers boutons.
         // On force donc l'affichage en 2 lignes, avec un bouton Retour toujours visible.
@@ -428,7 +433,7 @@ public class VueGraphique extends JFrame {
         changerContenu(nord, creerScroll(liste), sud);
     }
 
-    private void menuPlaylist(Abonne abonne, Playlist playlist) {
+    private void menuPlaylist(Utilisateur utilisateur, Playlist playlist) {
         DefaultListModel<String> modele = new DefaultListModel<>();
         JList<String> liste = creerListe(modele);
         JLabel labelDuree = new JLabel("Durée : " + formaterDuree(playlist.getDureeTotale()), SwingConstants.CENTER);
@@ -446,7 +451,7 @@ public class VueGraphique extends JFrame {
         JButton btnRetirer = creerBouton("Retirer");
         JButton btnRetour  = creerBouton("Retour");
 
-        btnAjouter.addActionListener(e -> menuAjoutMorceau(abonne, playlist, rafraichir));
+        btnAjouter.addActionListener(e -> menuAjoutMorceau(utilisateur, playlist, rafraichir));
 
         btnRetirer.addActionListener(e -> {
             int idx = liste.getSelectedIndex();
@@ -455,7 +460,7 @@ public class VueGraphique extends JFrame {
             else afficherInfo("Impossible.");
         });
 
-        btnRetour.addActionListener(e -> menuPlaylists(abonne));
+        btnRetour.addActionListener(e -> menuPlaylists(utilisateur));
 
         JPanel nord = new JPanel(new GridLayout(2, 1));
         nord.add(new JLabel(playlist.getNom(), SwingConstants.CENTER));
@@ -464,7 +469,7 @@ public class VueGraphique extends JFrame {
         changerContenu(nord, creerScroll(liste), creerPanelBoutons(btnAjouter, btnRetirer, btnRetour));
     }
 
-    private void menuAjoutMorceau(Abonne abonne, Playlist playlist, Runnable rafraichir) {
+    private void menuAjoutMorceau(Utilisateur utilisateur, Playlist playlist, Runnable rafraichir) {
         List<Morceau> morceaux = catalogueController.listerMorceaux();
         if (morceaux.isEmpty()) { afficherInfo("Catalogue vide."); return; }
 
@@ -481,11 +486,11 @@ public class VueGraphique extends JFrame {
             if (playlistController.ajouterMorceau(playlist, morceaux.get(idx))) {
                 rafraichir.run();
                 afficherInfo("Ajouté !");
-                menuPlaylist(abonne, playlist);
+                menuPlaylist(utilisateur, playlist);
             } else afficherInfo("Impossible (déjà présent ?).");
         });
 
-        btnRetour.addActionListener(e -> menuPlaylist(abonne, playlist));
+        btnRetour.addActionListener(e -> menuPlaylist(utilisateur, playlist));
 
         changerContenu(new JLabel("Ajouter un morceau", SwingConstants.CENTER), creerScroll(liste), creerPanelBoutons(btnAjouter, btnRetour));
     }

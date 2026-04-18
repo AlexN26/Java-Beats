@@ -19,6 +19,18 @@ public class Catalogue implements Serializable {
     public void ajouterAlbum(Album album) { albums.add(album); }
     public void ajouterArtiste(Artiste artiste) { artistes.add(artiste); }
     public void ajouterMorceau(Morceau morceau) { morceaux.add(morceau); }
+    public boolean supprimerMorceau(Morceau morceau) {
+        if (morceau == null) {
+            return false;
+        }
+        boolean supprime = morceaux.remove(morceau);
+        if (supprime) {
+            for (Album album : albums) {
+                album.getMorceaux().remove(morceau);
+            }
+        }
+        return supprime;
+    }
 
     public List<Morceau> rechercherMorceau(String titre) {
         return morceaux.stream()

@@ -511,12 +511,13 @@ public class VueGraphique extends JFrame {
 
     private void menuGererCatalogue() {
         DefaultListModel<String> modele = new DefaultListModel<>();
+        List<Morceau>[] morceauxAffiches = new List[]{List.of()};
 
         Runnable rafraichir = () -> {
             modele.clear();
-            List<Morceau> morceaux = catalogueController.listerMorceaux();
-            if (morceaux.isEmpty()) modele.addElement("(aucun morceau)");
-            else morceaux.forEach(m -> modele.addElement(m.getTitre() + " - " + m.getArtiste()));
+            morceauxAffiches[0] = catalogueController.listerMorceaux();
+            if (morceauxAffiches[0].isEmpty()) modele.addElement("(aucun morceau)");
+            else morceauxAffiches[0].forEach(m -> modele.addElement(m.getTitre() + " - " + m.getArtiste()));
         };
         rafraichir.run();
 
@@ -535,11 +536,32 @@ public class VueGraphique extends JFrame {
             try {
                 int duree = Integer.parseInt(champDuree.getText().trim());
                 Artiste artiste = new Artiste(champArtiste.getText().trim(), "");
-                catalogueController.getCatalogue().ajouterMorceau(
-                        new Morceau(champTitre.getText().trim(), duree, artiste));
+                catalogueController.ajouterMusique(new Morceau(champTitre.getText().trim(), duree, artiste));
                 rafraichir.run();
                 afficherInfo("Morceau ajouté !");
-            } catch (NumberFormatException ex) { afficherInfo("Durée invalide."); }
+            } catch (NumberFormatException ex) {
+                afficherInfo("Durée invalide.");
+            } catch (IllegalArgumentException ex) {
+                afficherInfo(ex.getMessage());
+            }
+        });
+
+        btnSupprimer.addActionListener(e -> {
+            int idx = liste.getSelectedIndex();
+            if (idx < 0 || morceauxAffiches[0].isEmpty()) {
+                afficherInfo("Sélectionnez un morceau.");
+                return;
+            }
+            Morceau morceau = morceauxAffiches[0].get(idx);
+            if (!demanderConfirmation("Supprimer le morceau \"" + morceau.getTitre() + "\" ?")) {
+                return;
+            }
+            if (catalogueController.supprimerMusique(morceau)) {
+                rafraichir.run();
+                afficherInfo("Morceau supprimé.");
+            } else {
+                afficherInfo("Suppression impossible.");
+            }
         });
 
         btnRetour.addActionListener(e -> menuAdmin());
@@ -550,12 +572,13 @@ public class VueGraphique extends JFrame {
     private void menuGererAbonnes() {
         DefaultListModel<String> modele = new DefaultListModel<>();
         JList<String> liste = creerListe(modele);
+        List<Utilisateur>[] utilisateursAffiches = new List[]{List.of()};
 
         Runnable rafraichir = () -> {
             modele.clear();
-            List<Utilisateur> utilisateurs = utilisateurController.listerUtilisateurs();
-            if (utilisateurs.isEmpty()) modele.addElement("(aucun utilisateur)");
-            else utilisateurs.forEach(u -> {
+            utilisateursAffiches[0] = utilisateurController.listerUtilisateurs();
+            if (utilisateursAffiches[0].isEmpty()) modele.addElement("(aucun utilisateur)");
+            else utilisateursAffiches[0].forEach(u -> {
                 String statut = (u instanceof Abonne a) ? (a.isAbonnementActif() ? " actif" : " suspendu") : "";
                 modele.addElement(u.getLogin() + " (" + u.getClass().getSimpleName() + ")" + statut);
             });
@@ -565,16 +588,35 @@ public class VueGraphique extends JFrame {
         JButton btnSuspendre = creerBouton("Suspendre");
         JButton btnSupprimer = creerBouton("Supprimer");
         JButton btnRetour    = creerBouton("Retour");
+        Runnable mettreAJourBoutonSuspension = () -> {
+            int idx = liste.getSelectedIndex();
+            if (idx < 0 || idx >= utilisateursAffiches[0].size()) {
+                btnSuspendre.setText("Suspendre");
+                return;
+            }
+            Utilisateur utilisateur = utilisateursAffiches[0].get(idx);
+            if (utilisateur instanceof Abonne abonne && !abonne.isAbonnementActif()) {
+                btnSuspendre.setText("Réactiver");
+            } else {
+                btnSuspendre.setText("Suspendre");
+            }
+        };
+        liste.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                mettreAJourBoutonSuspension.run();
+            }
+        });
 
         btnSuspendre.addActionListener(e -> {
             int idx = liste.getSelectedIndex();
-            List<Utilisateur> utilisateurs = utilisateurController.listerUtilisateurs();
             if (idx < 0) { afficherInfo("Sélectionnez un utilisateur."); return; }
-            Utilisateur u = utilisateurs.get(idx);
+            Utilisateur u = utilisateursAffiches[0].get(idx);
             if (u instanceof Abonne abonne) {
-                abonne.setAbonnementActif(false);
+                boolean actif = abonne.isAbonnementActif();
+                abonne.setAbonnementActif(!actif);
                 rafraichir.run();
-                afficherInfo("Compte suspendu.");
+                mettreAJourBoutonSuspension.run();
+                afficherInfo(actif ? "Compte suspendu." : "Suspension retirée.");
             } else afficherInfo("Impossible (pas un abonné).");
         });
 

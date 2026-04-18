@@ -31,11 +31,28 @@ public class CatalogueController {
 	}
 
 	public void ajouterMusique(Morceau morceau) {
-		throw new UnsupportedOperationException("Fonctionnalite administrateur non implementee.");
+		if (morceau == null || morceau.getTitre() == null || morceau.getTitre().isBlank()
+				|| morceau.getArtiste() == null || morceau.getArtiste().getNom() == null
+				|| morceau.getArtiste().getNom().isBlank() || morceau.getDureeSecondes() <= 0) {
+			throw new IllegalArgumentException("Informations de morceau invalides.");
+		}
+
+		Artiste artisteExistant = catalogue.getArtistes().stream()
+				.filter(a -> a.getNom().equalsIgnoreCase(morceau.getArtiste().getNom()))
+				.findFirst()
+				.orElse(null);
+		if (artisteExistant == null) {
+			artisteExistant = morceau.getArtiste();
+			catalogue.ajouterArtiste(artisteExistant);
+		} else {
+			morceau.setArtiste(artisteExistant);
+		}
+
+		catalogue.ajouterMorceau(morceau);
 	}
 
-	public void supprimerMusique(Morceau morceau) {
-		throw new UnsupportedOperationException("Fonctionnalite administrateur non implementee.");
+	public boolean supprimerMusique(Morceau morceau) {
+		return catalogue.supprimerMorceau(morceau);
 	}
 
 	public List<Morceau> rechercherMorceau(String titre) {

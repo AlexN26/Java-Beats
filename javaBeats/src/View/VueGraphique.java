@@ -305,11 +305,18 @@ public class VueGraphique extends JFrame {
 
         btnEcouter.addActionListener(e -> {
             int idx = liste.getSelectedIndex();
-            if (idx >= 0 && !resultat[0].isEmpty()) {
-                Morceau m = resultat[0].get(idx);
+            if (idx < 0 || resultat[0].isEmpty()) {
+                afficherInfo("Sélectionnez un morceau.");
+                return;
+            }
+            Morceau m = resultat[0].get(idx);
+            try {
                 catalogueController.ecouter(utilisateurController.getUtilisateurCourant(), m);
-                afficherInfo("Lecture de : " + m.getTitre());
-            } else afficherInfo("Sélectionnez un morceau.");
+                afficherBarreProgression(m);
+                modele.set(idx, m.getTitre() + " - " + m.getArtiste());
+            } catch (RuntimeException ex) {
+                afficherInfo(ex.getMessage());
+            }
         });
 
         btnRetour.addActionListener(e -> afficherMenuSelonRole());

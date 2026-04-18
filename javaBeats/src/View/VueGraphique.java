@@ -84,6 +84,78 @@ public class VueGraphique extends JFrame {
                 JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
+    private boolean utilisateurPeutDonnerAvis() {
+        return utilisateurController.estAbonneActif();
+    }
+
+    private Integer demanderNoteAvis() {
+        String saisie = JOptionPane.showInputDialog(this, "Note sur 5 :", "Donner un avis",
+                JOptionPane.PLAIN_MESSAGE);
+        if (saisie == null) return null;
+        try {
+            int note = Integer.parseInt(saisie.trim());
+            if (note < 1 || note > 5) {
+                afficherInfo("La note doit etre comprise entre 1 et 5.");
+                return null;
+            }
+            return note;
+        } catch (NumberFormatException ex) {
+            afficherInfo("Note invalide.");
+            return null;
+        }
+    }
+
+    private void afficherAvis(String titre, List<Avis> avis) {
+        JTextArea zoneTexte = new JTextArea();
+        zoneTexte.setEditable(false);
+        if (avis.isEmpty()) {
+            zoneTexte.setText("Aucun avis pour le moment.");
+        } else {
+            StringBuilder contenu = new StringBuilder();
+            for (Avis a : avis) {
+                String commentaire = a.getCommentaire() == null ? "" : a.getCommentaire();
+                contenu.append(a.getAuteurLogin())
+                        .append(" - ")
+                        .append(a.getNote())
+                        .append("/5");
+                if (!commentaire.isBlank()) {
+                    contenu.append(" : ").append(commentaire);
+                }
+                contenu.append("\n");
+            }
+            zoneTexte.setText(contenu.toString());
+        }
+        JOptionPane.showMessageDialog(this, new JScrollPane(zoneTexte), titre, JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void saisirAvisMorceau(Morceau morceau) {
+        Integer note = demanderNoteAvis();
+        if (note == null) return;
+        String commentaire = JOptionPane.showInputDialog(this, "Commentaire :", "Donner un avis",
+                JOptionPane.PLAIN_MESSAGE);
+        if (commentaire == null) return;
+        try {
+            catalogueController.ajouterAvisMorceau(utilisateurController.getUtilisateurCourant(), morceau, note, commentaire);
+            afficherInfo("Avis ajoute.");
+        } catch (IllegalArgumentException ex) {
+            afficherInfo(ex.getMessage());
+        }
+    }
+
+    private void saisirAvisAlbum(Album album) {
+        Integer note = demanderNoteAvis();
+        if (note == null) return;
+        String commentaire = JOptionPane.showInputDialog(this, "Commentaire :", "Donner un avis",
+                JOptionPane.PLAIN_MESSAGE);
+        if (commentaire == null) return;
+        try {
+            catalogueController.ajouterAvisAlbum(utilisateurController.getUtilisateurCourant(), album, note, commentaire);
+            afficherInfo("Avis ajoute.");
+        } catch (IllegalArgumentException ex) {
+            afficherInfo(ex.getMessage());
+        }
+    }
+
     private String formaterDuree(int secondes) {
         return secondes / 60 + ":" + String.format("%02d", secondes % 60);
     }
@@ -205,11 +277,12 @@ public class VueGraphique extends JFrame {
         centre.setLayout(new BoxLayout(centre, BoxLayout.Y_AXIS));
 
         JButton btnCatalogue  = creerBouton("Catalogue");
+        JButton btnAlbums     = creerBouton("Albums");
         JButton btnRecherche  = creerBouton("Rechercher");
         JButton btnPlaylists  = creerBouton("Mes playlists");
         JButton btnHistorique = creerBouton("Historique");
 
-        for (JButton b : new JButton[]{btnCatalogue, btnRecherche, btnPlaylists, btnHistorique}) {
+        for (JButton b : new JButton[]{btnCatalogue, btnAlbums, btnRecherche, btnPlaylists, btnHistorique}) {
             b.setAlignmentX(Component.CENTER_ALIGNMENT);
             b.setMaximumSize(new Dimension(280, 38));
             centre.add(b);
@@ -217,6 +290,7 @@ public class VueGraphique extends JFrame {
         }
 
         btnCatalogue.addActionListener(e -> menuCatalogue());
+        btnAlbums.addActionListener(e -> menuAlbums());
         btnRecherche.addActionListener(e -> menuRecherche());
         btnPlaylists.addActionListener(e -> menuPlaylists(abonne));
         btnHistorique.addActionListener(e -> menuHistorique(abonne));
@@ -259,12 +333,15 @@ public class VueGraphique extends JFrame {
     private void menuCatalogue() {
         List<Morceau> morceaux = catalogueController.listerMorceaux();
         DefaultListModel<String> modele = new DefaultListModel<>();
-        morceaux.forEach(m -> modele.addElement(m.getTitre() + " - " + m.getArtiste() + " | " + m.getNbEcoutes() + " écoutes"));
+        morceaux.forEach(m -> modele.addElement(m.getTitre() + " - " + m.getArtiste() + " | " + m.getNbEcoutes() + " écoutes | " +
+                String.format("%.1f/5", m.getNoteMoyenne())));
         if (morceaux.isEmpty()) modele.addElement("(catalogue vide)");
 
         JList<String> liste = creerListe(modele);
 
         JButton btnEcouter = creerBouton("Écouter");
+        JButton btnAvis    = creerBouton("Donner un avis");
+        JButton btnVoirAvis = creerBouton("Voir les avis");
         JButton btnRetour  = creerBouton("Retour");
 
         btnEcouter.addActionListener(e -> {
@@ -274,14 +351,64 @@ public class VueGraphique extends JFrame {
             try {
                 catalogueController.ecouter(utilisateurController.getUtilisateurCourant(), m);
                 afficherBarreProgression(m);
-                modele.set(idx, m.getTitre() + " - " + m.getArtiste() + " | " + m.getNbEcoutes() + " écoutes");
+                modele.set(idx, m.getTitre() + " - " + m.getArtiste() + " | " + m.getNbEcoutes() + " écoutes | " +
+                        String.format("%.1f/5", m.getNoteMoyenne()));
             } catch (RuntimeException ex) {
                 afficherInfo(ex.getMessage());
             }
         });
+        btnAvis.addActionListener(e -> {
+            int idx = liste.getSelectedIndex();
+            if (idx < 0 || morceaux.isEmpty()) { afficherInfo("Sélectionnez un morceau."); return; }
+            saisirAvisMorceau(morceaux.get(idx));
+            Morceau m = morceaux.get(idx);
+            modele.set(idx, m.getTitre() + " - " + m.getArtiste() + " | " + m.getNbEcoutes() + " écoutes | " +
+                    String.format("%.1f/5", m.getNoteMoyenne()));
+        });
+        btnVoirAvis.addActionListener(e -> {
+            int idx = liste.getSelectedIndex();
+            if (idx < 0 || morceaux.isEmpty()) { afficherInfo("Sélectionnez un morceau."); return; }
+            Morceau m = morceaux.get(idx);
+            afficherAvis("Avis - " + m.getTitre(), m.getAvis());
+        });
         btnRetour.addActionListener(e -> afficherMenuSelonRole());
 
-        changerContenu(new JLabel("Catalogue", SwingConstants.CENTER), creerScroll(liste), creerPanelBoutons(btnEcouter, btnRetour));
+        JPanel sud = utilisateurPeutDonnerAvis()
+                ? creerPanelBoutons(btnEcouter, btnAvis, btnVoirAvis, btnRetour)
+                : creerPanelBoutons(btnEcouter, btnVoirAvis, btnRetour);
+        changerContenu(new JLabel("Catalogue", SwingConstants.CENTER), creerScroll(liste), sud);
+    }
+
+    private void menuAlbums() {
+        List<Album> albums = catalogueController.listerAlbums();
+        DefaultListModel<String> modele = new DefaultListModel<>();
+        albums.forEach(a -> modele.addElement(a.getNom() + " - " + a.getArtiste() + " | " + a.getMorceaux().size() +
+                " morceaux | " + String.format("%.1f/5", a.getNoteMoyenne())));
+        if (albums.isEmpty()) modele.addElement("(aucun album)");
+
+        JList<String> liste = creerListe(modele);
+        JButton btnAvis = creerBouton("Donner un avis");
+        JButton btnVoirAvis = creerBouton("Voir les avis");
+        JButton btnRetour = creerBouton("Retour");
+
+        btnAvis.addActionListener(e -> {
+            int idx = liste.getSelectedIndex();
+            if (idx < 0 || albums.isEmpty()) { afficherInfo("Sélectionnez un album."); return; }
+            saisirAvisAlbum(albums.get(idx));
+            Album a = albums.get(idx);
+            modele.set(idx, a.getNom() + " - " + a.getArtiste() + " | " + a.getMorceaux().size() +
+                    " morceaux | " + String.format("%.1f/5", a.getNoteMoyenne()));
+        });
+        btnVoirAvis.addActionListener(e -> {
+            int idx = liste.getSelectedIndex();
+            if (idx < 0 || albums.isEmpty()) { afficherInfo("Sélectionnez un album."); return; }
+            Album a = albums.get(idx);
+            afficherAvis("Avis - " + a.getNom(), a.getAvis());
+        });
+        btnRetour.addActionListener(e -> afficherMenuSelonRole());
+
+        changerContenu(new JLabel("Albums", SwingConstants.CENTER), creerScroll(liste),
+                creerPanelBoutons(btnAvis, btnVoirAvis, btnRetour));
     }
 
     // =========================
@@ -588,7 +715,7 @@ public class VueGraphique extends JFrame {
 
         Runnable rafraichir = () -> {
             modele.clear();
-            utilisateursAffiches[0] = utilisateurController.listerUtilisateurs();
+            utilisateursAffiches[0] = utilisateurController.listerUtilisateursGerables();
             if (utilisateursAffiches[0].isEmpty()) modele.addElement("(aucun utilisateur)");
             else utilisateursAffiches[0].forEach(u -> {
                 String statut = (u instanceof Abonne a) ? (a.isAbonnementActif() ? " actif" : " suspendu") : "";
@@ -632,6 +759,25 @@ public class VueGraphique extends JFrame {
             } else afficherInfo("Impossible (pas un abonné).");
         });
 
+        btnSupprimer.addActionListener(e -> {
+            int idx = liste.getSelectedIndex();
+            if (idx < 0 || utilisateursAffiches[0].isEmpty()) {
+                afficherInfo("Sélectionnez un utilisateur.");
+                return;
+            }
+            Utilisateur utilisateur = utilisateursAffiches[0].get(idx);
+            if (!demanderConfirmation("Supprimer l'utilisateur \"" + utilisateur.getLogin() + "\" ?")) {
+                return;
+            }
+            if (utilisateurController.supprimerInscrit(utilisateur.getLogin())) {
+                rafraichir.run();
+                mettreAJourBoutonSuspension.run();
+                afficherInfo("Utilisateur supprimé.");
+            } else {
+                afficherInfo("Suppression impossible.");
+            }
+        });
+
         btnRetour.addActionListener(e -> menuAdmin());
 
         changerContenu(new JLabel("Gestion des abonnés", SwingConstants.CENTER), creerScroll(liste), creerPanelBoutons(btnSuspendre, btnSupprimer, btnRetour));
@@ -646,6 +792,7 @@ public class VueGraphique extends JFrame {
                         "Morceaux        : " + catalogueController.listerMorceaux().size() + "\n" +
                         "Albums          : " + catalogueController.listerAlbums().size() + "\n" +
                         "Artistes        : " + catalogueController.listerArtistes().size() + "\n\n" +
+                        "Ecoutes totales : " + stats.getNbEcoutesTotal() + "\n" +
                         "Durée moyenne   : " + String.format("%.0f sec", stats.getDureeMoyenneMorceaux()) + "\n" +
                         "Top morceau     : " + (morceauTop != null ? morceauTop.getTitre() + " (" + morceauTop.getNbEcoutes() + " écoutes)" : "aucun");
 

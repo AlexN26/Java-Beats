@@ -6,7 +6,6 @@ import java.util.List;
 
 public class Statistique implements Serializable {
     private Catalogue catalogue;
-    private int nbEcoutesTotal;
     public Statistique(Catalogue catalogue) {
         this.catalogue = catalogue;
     }
@@ -22,6 +21,12 @@ public class Statistique implements Serializable {
                 .mapToInt(Morceau::getDureeSecondes)
                 .average()
                 .orElse(0);
+    }
+
+    public int getNbEcoutesTotal() {
+        return catalogue.getMorceaux().stream()
+                .mapToInt(Morceau::getNbEcoutes)
+                .sum();
     }
 
     public List<Artiste> getTop3Artistes() {

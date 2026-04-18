@@ -26,6 +26,30 @@ public class CatalogueController {
 		return catalogue.getAlbums();
 	}
 
+	public Avis ajouterAvisMorceau(Utilisateur utilisateur, Morceau morceau, int note, String commentaire) {
+		if (!(utilisateur instanceof Abonne abonne) || !abonne.isAbonnementActif()) {
+			throw new IllegalArgumentException("Seuls les abonnes actifs peuvent donner un avis.");
+		}
+		if (morceau == null) {
+			throw new IllegalArgumentException("Morceau introuvable.");
+		}
+		Avis avis = new Avis(note, commentaire == null ? "" : commentaire.trim(), utilisateur.getLogin(), morceau);
+		morceau.ajouterAvis(avis);
+		return avis;
+	}
+
+	public Avis ajouterAvisAlbum(Utilisateur utilisateur, Album album, int note, String commentaire) {
+		if (!(utilisateur instanceof Abonne abonne) || !abonne.isAbonnementActif()) {
+			throw new IllegalArgumentException("Seuls les abonnes actifs peuvent donner un avis.");
+		}
+		if (album == null) {
+			throw new IllegalArgumentException("Album introuvable.");
+		}
+		Avis avis = new Avis(note, commentaire == null ? "" : commentaire.trim(), utilisateur.getLogin(), album);
+		album.ajouterAvis(avis);
+		return avis;
+	}
+
 	public List<Artiste> listerArtistes() {
 		return catalogue.getArtistes();
 	}

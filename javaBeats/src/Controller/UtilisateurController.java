@@ -96,12 +96,33 @@ public class UtilisateurController {
 		throw new UnsupportedOperationException("Fonctionnalite administrateur non implementee.");
 	}
 
-	public void supprimerInscrit(String login) {
-		throw new UnsupportedOperationException("Fonctionnalite administrateur non implementee.");
+	public boolean supprimerInscrit(String login) {
+		if (login == null || login.isBlank()) {
+			return false;
+		}
+		Utilisateur utilisateur = utilisateursParLogin.get(login);
+		if (utilisateur == null || utilisateur instanceof Administrateur) {
+			return false;
+		}
+		utilisateursParLogin.remove(login);
+		if (utilisateurCourant != null && utilisateurCourant.getLogin().equals(login)) {
+			utilisateurCourant = null;
+		}
+		return true;
 	}
 
 	public List<Utilisateur> listerUtilisateurs() {
 		return new ArrayList<>(utilisateursParLogin.values());
+	}
+
+	public List<Utilisateur> listerUtilisateursGerables() {
+		List<Utilisateur> utilisateurs = new ArrayList<>();
+		for (Utilisateur utilisateur : utilisateursParLogin.values()) {
+			if (!(utilisateur instanceof Administrateur)) {
+				utilisateurs.add(utilisateur);
+			}
+		}
+		return utilisateurs;
 	}
 
 	public void deconnexion() {

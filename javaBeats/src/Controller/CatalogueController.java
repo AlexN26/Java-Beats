@@ -128,15 +128,6 @@ public class CatalogueController {
 		daftPunk.ajouterAlbum(randomAccess);
 		stromae.ajouterAlbum(racineCarree);
 
-		Morceau getLucky = new Morceau("Get Lucky", 369, daftPunk);
-		Morceau instantCrush = new Morceau("Instant Crush", 337, daftPunk);
-		Morceau tousLesMemes = new Morceau("Tous les mêmes", 197, stromae);
-		catalogue.ajouterMorceau(getLucky);
-		catalogue.ajouterMorceau(instantCrush);
-		catalogue.ajouterMorceau(tousLesMemes);
 
-		randomAccess.ajouterMorceau(getLucky);
-		randomAccess.ajouterMorceau(instantCrush);
-		racineCarree.ajouterMorceau(tousLesMemes);
 	}
 }

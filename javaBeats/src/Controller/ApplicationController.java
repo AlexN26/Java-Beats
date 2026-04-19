@@ -7,6 +7,7 @@ import View.VueGraphique;
 
 import java.io.IOException;
 import java.util.Map;
+import javax.swing.*;
 
 /**
  * Point d'entrée "métier" de l'application.
@@ -44,8 +45,26 @@ public class ApplicationController {
             }
         }));
 
-        VueGraphique vueGraphique = new VueGraphique(utilisateurController, catalogueController, playlistController);
-        vueGraphique.run();
+        // Choix de l'interface au démarrage
+        String[] options = {"Interface graphique", "Interface console"};
+        int choix = JOptionPane.showOptionDialog(
+                null,
+                "Choisissez l'interface :",
+                "JavaBeats",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        if (choix == 1) {
+            View.VueConsole vueConsole = new View.VueConsole(utilisateurController, catalogueController, playlistController);
+            vueConsole.run();
+        } else {
+            VueGraphique vueGraphique = new VueGraphique(utilisateurController, catalogueController, playlistController);
+            vueGraphique.run();
+        }
     }
 }
 

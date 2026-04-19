@@ -63,6 +63,21 @@ public class VueGraphique extends JFrame {
         return panel;
     }
 
+    private JPanel creerPanelBoutonsDeuxLignes(JButton... boutons) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        JPanel ligne1 = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        JPanel ligne2 = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+
+        for (int i = 0; i < boutons.length; i++) {
+            if (i < 3) ligne1.add(boutons[i]);
+            else ligne2.add(boutons[i]);
+        }
+        panel.add(ligne1);
+        if (boutons.length > 3) panel.add(ligne2);
+        return panel;
+    }
+
     private void changerContenu(JComponent nord, JComponent centre, JComponent sud) {
         getContentPane().removeAll();
         getContentPane().setLayout(new BorderLayout(0, 5));
@@ -362,8 +377,8 @@ public class VueGraphique extends JFrame {
         btnRetour.addActionListener(e -> afficherMenuSelonRole());
 
         JPanel sud = utilisateurPeutDonnerAvis()
-                ? creerPanelBoutons(btnEcouter, btnAvis, btnVoirAvis, btnRetour)
-                : creerPanelBoutons(btnEcouter, btnVoirAvis, btnRetour);
+                ? creerPanelBoutonsDeuxLignes(btnEcouter, btnAvis, btnVoirAvis, btnRetour)
+                : creerPanelBoutonsDeuxLignes(btnEcouter, btnVoirAvis, btnRetour);
         changerContenu(new JLabel("Catalogue", SwingConstants.CENTER), creerScroll(liste), sud);
     }
 

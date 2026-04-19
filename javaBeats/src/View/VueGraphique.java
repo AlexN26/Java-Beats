@@ -31,10 +31,8 @@ public class VueGraphique extends JFrame {
 
     public void run() { setVisible(true); }
 
-    // =========================
+    
     // Helpers
-    // =========================
-
     private JButton creerBouton(String texte) {
         JButton bouton = new JButton(texte);
         bouton.setPreferredSize(new Dimension(220, 38));
@@ -167,10 +165,8 @@ public class VueGraphique extends JFrame {
         return bouton;
     }
 
-    // =========================
+    
     // Accueil
-    // =========================
-
     private void afficherAccueil() {
         JPanel centre = new JPanel();
         centre.setLayout(new BoxLayout(centre, BoxLayout.Y_AXIS));
@@ -198,10 +194,8 @@ public class VueGraphique extends JFrame {
         changerContenu(new JLabel("JavaBeats", SwingConstants.CENTER), centre, null);
     }
 
-    // =========================
-    // Connexion / Inscription
-    // =========================
-
+    
+    // connexion et inscription
     private void ecranConnexion() {
         JTextField champNom = new JTextField();
         JPasswordField champMotDePasse = new JPasswordField();
@@ -234,10 +228,8 @@ public class VueGraphique extends JFrame {
         }
     }
 
-    // =========================
+    
     // Routage
-    // =========================
-
     private void afficherMenuSelonRole() {
         if (utilisateurController.estAdmin()) {
             menuAdmin();
@@ -248,10 +240,8 @@ public class VueGraphique extends JFrame {
         }
     }
 
-    // =========================
-    // Menus principaux
-    // =========================
-
+    
+    // menu
     private void menuVisiteur() {
         JPanel centre = new JPanel();
         centre.setLayout(new BoxLayout(centre, BoxLayout.Y_AXIS));
@@ -326,10 +316,8 @@ public class VueGraphique extends JFrame {
         changerContenu(new JLabel("Menu Admin", SwingConstants.CENTER), centre, creerPanelBoutons(creerBoutonDeconnexion()));
     }
 
-    // =========================
-    // Catalogue
-    // =========================
-
+    
+    // catalogue
     private void menuCatalogue() {
         List<Morceau> morceaux = catalogueController.listerMorceaux();
         DefaultListModel<String> modele = new DefaultListModel<>();
@@ -411,10 +399,8 @@ public class VueGraphique extends JFrame {
                 creerPanelBoutons(btnAvis, btnVoirAvis, btnRetour));
     }
 
-    // =========================
+    
     // Recherche
-    // =========================
-
     private void menuRecherche() {
         DefaultListModel<String> modele = new DefaultListModel<>();
         JList<String> liste = creerListe(modele);
@@ -458,6 +444,7 @@ public class VueGraphique extends JFrame {
         changerContenu(nord, creerScroll(liste), creerPanelBoutons(btnEcouter, btnRetour));
     }
 
+    //barre d'ecoute
     private void afficherBarreProgression(Morceau morceau) {
         JDialog dialog = new JDialog(this, "Lecture en cours", true);
         dialog.setSize(300, 200);
@@ -470,7 +457,7 @@ public class VueGraphique extends JFrame {
         dialog.add(label, BorderLayout.NORTH);
         dialog.add(barre, BorderLayout.CENTER);
 
-        // Timer qui avance la barre sur 3 secondes
+        // timer de la barre pour que ca dure 5 secondes
         Timer timer = new Timer(500, null);
         timer.addActionListener(evt -> {
             int val = barre.getValue() + 10;
@@ -485,11 +472,9 @@ public class VueGraphique extends JFrame {
         timer.start();
         dialog.setVisible(true);
     }
-    // =========================
+    
     // Playlists
-    // =========================
-
-    private void menuPlaylists(Utilisateur utilisateur) {
+        private void menuPlaylists(Utilisateur utilisateur) {
         DefaultListModel<String> modele = new DefaultListModel<>();
         JList<String> liste = creerListe(modele);
 
@@ -550,8 +535,7 @@ public class VueGraphique extends JFrame {
         JPanel nord = new JPanel(new BorderLayout(10, 5));
         nord.add(new JLabel("Mes Playlists", SwingConstants.CENTER), BorderLayout.CENTER);
 
-        // Sur une fenêtre étroite, un FlowLayout peut "cacher" les derniers boutons.
-        // On force donc l'affichage en 2 lignes, avec un bouton Retour toujours visible.
+    //bouton retour
         JPanel sud = new JPanel();
         sud.setLayout(new BoxLayout(sud, BoxLayout.Y_AXIS));
         sud.add(creerPanelBoutons(btnCreer, btnRenommer, btnSupprimer));
@@ -560,6 +544,7 @@ public class VueGraphique extends JFrame {
         changerContenu(nord, creerScroll(liste), sud);
     }
 
+    //menu de la playlist
     private void menuPlaylist(Utilisateur utilisateur, Playlist playlist) {
         DefaultListModel<String> modele = new DefaultListModel<>();
         JList<String> liste = creerListe(modele);
@@ -622,10 +607,8 @@ public class VueGraphique extends JFrame {
         changerContenu(new JLabel("Ajouter un morceau", SwingConstants.CENTER), creerScroll(liste), creerPanelBoutons(btnAjouter, btnRetour));
     }
 
-    // =========================
+    
     // Historique
-    // =========================
-
     private void menuHistorique(Abonne abonne) {
         DefaultListModel<String> modele = new DefaultListModel<>();
         List<EntreeHistorique> entrees = abonne.getHistorique().getEntrees();
@@ -644,10 +627,8 @@ public class VueGraphique extends JFrame {
         changerContenu(nord, creerScroll(liste), creerPanelBoutons(btnRetour));
     }
 
-    // =========================
-    // Administration
-    // =========================
-
+    
+    // fenetre admin
     private void menuGererCatalogue() {
         DefaultListModel<String> modele = new DefaultListModel<>();
         List<Morceau>[] morceauxAffiches = new List[]{List.of()};

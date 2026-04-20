@@ -798,9 +798,26 @@ public class VueGraphique extends JFrame {
         };
         rafraichir.run();
 
+        JButton btnEcouter = creerBouton("Écouter");
         JButton btnAjouter = crierBoutonVert("Ajouter");
         JButton btnRetirer = crierBoutonRouge("Retirer");
         JButton btnRetour = crierBouton("Retour");
+
+        btnEcouter.addActionListener(e -> {
+            int idx = liste.getSelectedIndex();
+            List<Morceau> morceaux = playlist.getMorceaux();
+            if (idx < 0 || morceaux.isEmpty()) {
+                afficherInfo("Sélectionnez un morceau.");
+                return;
+            }
+            Morceau m = morceaux.get(idx);
+            try {
+                catalogueController.ecouter(utilisateurController.getUtilisateurCourant(), m);
+                afficherBarreProgression(m);
+            } catch (RuntimeException ex) {
+                afficherInfo(ex.getMessage());
+            }
+        });
 
         btnAjouter.addActionListener(e -> menuAjoutMorceau(utilisateur, playlist, rafraichir));
 
@@ -827,7 +844,7 @@ public class VueGraphique extends JFrame {
         nord.add(nom);
         nord.add(labelDuree);
 
-        changerContenu(nord, scroll, creerPanelBoutons(btnAjouter, btnRetirer, btnRetour), IMAGES[6]);
+        changerContenu(nord, scroll, creerPanelBoutonsDeuxLignes(btnEcouter, btnAjouter, btnRetirer, btnRetour), IMAGES[6]);
     }
 
     private void menuAjoutMorceau(Utilisateur utilisateur, Playlist playlist, Runnable rafraichir) {

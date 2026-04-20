@@ -245,17 +245,70 @@ public class VueConsole {
     }
 
     private void menuPlaylists(Utilisateur utilisateur) {
-        List<Playlist> playlists = playlistController.listerPlaylists(utilisateur);
-        System.out.println("\n--- Mes playlists ---");
-        if (playlists.isEmpty()) {
-            System.out.println("(aucune playlist)");
-        } else {
+        while (true) {
+            List<Playlist> playlists = playlistController.listerPlaylists(utilisateur);
+            System.out.println("\n--- Mes playlists ---");
+            if (playlists.isEmpty()) {
+                System.out.println("(aucune playlist)");
+                System.out.println("0) Retour");
+                System.out.print("> ");
+                if (lireInt() == 0) return;
+                continue;
+            }
+
             for (int i = 0; i < playlists.size(); i++) {
                 Playlist p = playlists.get(i);
                 System.out.printf("%d) %s (%d morceaux)\n", i + 1, p.getNom(), p.getMorceaux().size());
             }
+            System.out.println("0) Retour");
+            System.out.print("> ");
+
+            int choix = lireInt();
+            if (choix == 0) return;
+            int idx = choix - 1;
+            if (idx < 0 || idx >= playlists.size()) {
+                System.out.println("Sélection invalide.");
+                continue;
+            }
+            menuPlaylist(playlists.get(idx));
         }
-        System.out.println("(retour)");
+    }
+
+    private void menuPlaylist(Playlist playlist) {
+        while (true) {
+            List<Morceau> morceaux = playlist.getMorceaux();
+            System.out.println("\n--- Playlist: " + playlist.getNom() + " ---");
+            if (morceaux.isEmpty()) {
+                System.out.println("(playlist vide)");
+                System.out.println("0) Retour");
+                System.out.print("> ");
+                if (lireInt() == 0) return;
+                continue;
+            }
+
+            for (int i = 0; i < morceaux.size(); i++) {
+                Morceau m = morceaux.get(i);
+                System.out.printf("%d) %s - %s\n", i + 1, m.getTitre(), m.getArtiste());
+            }
+            System.out.println("0) Retour");
+            System.out.print("> ");
+
+            int choix = lireInt();
+            if (choix == 0) return;
+            int idx = choix - 1;
+            if (idx < 0 || idx >= morceaux.size()) {
+                System.out.println("Sélection invalide.");
+                continue;
+            }
+
+            Morceau m = morceaux.get(idx);
+            try {
+                catalogueController.ecouter(utilisateurController.getUtilisateurCourant(), m);
+                System.out.println("Lecture: " + m.getTitre());
+            } catch (RuntimeException ex) {
+                System.out.println("Erreur: " + ex.getMessage());
+            }
+        }
     }
 
     private int lireInt() {
